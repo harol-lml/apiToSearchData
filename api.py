@@ -4,23 +4,18 @@ from get_data import get_data
 
 app = FastAPI()
 
-
-@app.get("/")
-def read_root():
-    return {"Api": "hello"}
-
-
 @app.get("/datascr")
-def read_item(id: Union[str, None] = None, per: Union[str, None] = None):
+def read_item(id: Union[str, None] = None, per: Union[str, None] = None, pages: Union[str, None] = 1):
     if id and per:
         data = get_data.getById(id, per, 1)
         if 'error' in data : return data
-        # for index, number in enumerate(range(2, 29), start=2):
-        #     print(f'Número {index}: {number}')
-        #     dt = get_data.getById(id, per, number)
-        #     if len(dt) == 0:
-        #         break
-        #     data.extend(dt)
+        if pages <= 1: return data
+        for index, number in enumerate(range(2, pages), start=2):
+            print(f'Número {index}: {number}')
+            dt = get_data.getById(id, per, number)
+            if len(dt) == 0:
+                break
+            data.extend(dt)
         return data
     return 'No data'
 
