@@ -1,4 +1,9 @@
 import requests
+import copy
+
+from mongodb import mongo_db
+
+dbname = mongo_db()
 
 json_data = {
     'numeroCausa': '',
@@ -37,6 +42,13 @@ class get_data:
 
         else:
             return {'error':'person tipe no valid'}
+
+        tp = 'actor' if per == '0' else 'demandado'
+
+        datam = man.getDataMongo(id, tp)
+
+        if(len(datam)>0):   return datam
+
         params['page'] = page
         response = requests.post(
             urlBase+"/buscarCausas",
@@ -52,8 +64,10 @@ class get_data:
                 proceso['detail'] = detail
                 upJuice = man.getUpdateProcess(proceso)
                 proceso['updates'] = upJuice
-
-                # return proceso
+                dt = copy.deepcopy(proceso)
+                dt['idUser'] = id
+                dt['type'] = 'actor' if per == '0' else 'demandado'
+                man.saveData(dt)
             return (procesos)
         else:
             error = 'Error al cargar la página:'. response.status_code
@@ -90,4 +104,9 @@ class get_data:
         else:
             print(datajs)
 
+    def getDataMongo(self, id, per):
+        return dbname.getById(id, per)
+
+    def saveData(self, data):
+        return dbname.postProcess(data)
 man = get_data()
