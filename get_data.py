@@ -112,7 +112,7 @@ class get_data:
 
     def getDataInMongo(id, per):
 
-        tp = 'actor' if per == '' else 'demandado'
+        tp = 'actor' if per == '0' else 'demandado'
         datam = man.getDataMongo(id, tp)
 
         return datam
