@@ -7,10 +7,10 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Api": "hello"}
 
 
-@app.get("/data")
+@app.get("/datascr")
 def read_item(id: Union[str, None] = None, per: Union[str, None] = None):
     if id and per:
         data = get_data.getById(id, per, 1)
@@ -26,5 +26,7 @@ def read_item(id: Union[str, None] = None, per: Union[str, None] = None):
 
 @app.get("/datam")
 def read_data(id: Union[str, None] = None, per: Union[str, None] = None):
-    data = get_data.getDataMongo(id, per)
-    return data
+    if id and per:
+        data = get_data.getDataInMongo(id, per)
+        return data
+    return {'error':'no data'}

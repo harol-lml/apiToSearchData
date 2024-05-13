@@ -109,4 +109,12 @@ class get_data:
 
     def saveData(self, data):
         return dbname.postProcess(data)
+
+    def getDataInMongo(id, per):
+
+        tp = 'actor' if per == '' else 'demandado'
+        datam = man.getDataMongo(id, tp)
+
+        return datam
+
 man = get_data()
