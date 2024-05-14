@@ -43,11 +43,9 @@ class get_data:
         else:
             return {'error':'person tipe no valid'}
 
-        tp = 'actor' if per == '0' else 'demandado'
-
-        datam = man.getDataMongo(id, tp)
-
-        if(len(datam)>0):   return datam
+        # tp = 'actor' if per == '0' else 'demandado'
+        # datam = man.getDataMongo(id, tp)
+        # if(len(datam)>0):   return datam
 
         params['page'] = page
         response = requests.post(
