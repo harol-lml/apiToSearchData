@@ -1,7 +1,7 @@
 from typing import Union
 from fastapi import FastAPI
 from get_data import get_data
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Path, Query, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from typing import Optional
@@ -10,8 +10,24 @@ import os
 import datetime
 import jwt
 
-app = FastAPI()
-
+tags_metadata = [
+    {
+        "name":'scraping',
+        "description":'get scraping data'
+    },
+    {
+        "name":'mongo',
+        "description":'get data from mongo'
+    },
+]
+app = FastAPI(
+    title="APiToSearchData",
+    version="0.0.1",
+    contact={
+        "name": "Harold lml"
+    },
+    openapi_tags=tags_metadata
+)
 load_dotenv()
 
 # Configuración de la clave secreta
@@ -80,8 +96,28 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-@app.get("/datascr")
-async def read_item(id: Union[str, None] = None, per: Union[str, None] = None, pages: Union[str, None] = 1,current_user: User = Depends(get_current_user)):
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["username"]}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/datascr",tags=["scraping"])
+async def read_item(
+    id: Union[str, None] = Query(None, alias="Cédula/RUC/Pasaporte", title="Query string", description="String for the item search"),
+    per: Union[str, None] = Query(None, alias="Actor/Demanadado", title="Query string", description="0 to Actor, 1 to Demandado"),
+    pages: Union[str, None] = 1,
+    current_user: User = Depends(get_current_user)
+):
     if id and per:
         data = get_data.getById(id, per, 1)
         if 'error' in data : return data
@@ -95,8 +131,11 @@ async def read_item(id: Union[str, None] = None, per: Union[str, None] = None, p
         return data
     return 'No data'
 
-@app.get("/datam")
-async def read_data(id: Union[str, None] = None, per: Union[str, None] = None,current_user: User = Depends(get_current_user)):
+@app.get("/datam", tags=["mongo"])
+async def read_data(
+    id: Union[str, None] = Query(None, alias="Cédula/RUC/Pasaporte", title="Query string", description="String for the item search"),
+    per: Union[str, None] = Query(None, alias="Actor/Demanadado", title="Query string", description="0 to Actor, 1 to Demandado"),
+    current_user: User = Depends(get_current_user) ):
     if id and per:
         data = get_data.getDataInMongo(id, per)
         return data
