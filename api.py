@@ -9,8 +9,8 @@ def read_item(id: Union[str, None] = None, per: Union[str, None] = None, pages: 
     if id and per:
         data = get_data.getById(id, per, 1)
         if 'error' in data : return data
-        if pages <= 1: return data
-        for index, number in enumerate(range(2, pages), start=2):
+        if int(pages) <= 1: return data
+        for index, number in enumerate(range(2, int(pages)), start=2):
             print(f'Número {index}: {number}')
             dt = get_data.getById(id, per, number)
             if len(dt) == 0:
