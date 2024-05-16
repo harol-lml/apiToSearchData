@@ -1,6 +1,6 @@
 # Docker fastapi
 
-Is a little project (CRUD) using fastapi and docker
+Is a little project to search data using fastapi and docker
 
 ## Installation Docker
 [Insall](https://www.docker.com/) docker and docker-compose
